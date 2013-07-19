@@ -5,28 +5,35 @@
 
 #include "vcc_if.h"
 
+#include <sys/socket.h>
+#include <netdb.h>
+
 int
-init_function(struct vmod_priv *priv, const struct VCL_conf *conf)
-{
+init_function(struct vmod_priv *priv, const struct VCL_conf *conf) {
 	return (0);
 }
 
-const char *
-vmod_hello(struct sess *sp, const char *name)
-{
-	char *p;
-	unsigned u, v;
+void vmod_clientip(struct sess *sp, const char *ipstring) {
+	struct addrinfo hints;
+	struct addrinfo *rp;
+	int s;
 
-	u = WS_Reserve(sp->wrk->ws, 0); /* Reserve some work space */
-	p = sp->wrk->ws->f;		/* Front of workspace area */
-	v = snprintf(p, u, "Hello, %s", name);
-	v++;
-	if (v > u) {
-		/* No space, reset and leave */
-		WS_Release(sp->wrk->ws, 0);
-		return (NULL);
+	memset(&hints, 0, sizeof(struct addrinfo));
+	hints.ai_family = AF_UNSPEC;
+
+	// Don't attempt DNS resolution.
+	hints.ai_flags = AI_NUMERICHOST;
+	hints.ai_protocol = 0;
+
+	s = getaddrinfo(ipstring, NULL, &hints, &rp);
+	if (s != 0) {
+		VSL(SLT_Debug, 0, "ipcast: Unable to decode IP address '%s'", ipstring);
+		VSL(SLT_Debug, 0, "ipcast: getaddrinfo(): %s", gai_strerror(s));
+		return;
 	}
-	/* Update work space with what we've used */
-	WS_Release(sp->wrk->ws, v);
-	return (p);
+
+	sp->sockaddrlen = rp->ai_addrlen;
+	memcpy(sp->sockaddr, rp->ai_addr, sizeof(struct sockaddr_storage));
+
+	freeaddrinfo(rp);
 }

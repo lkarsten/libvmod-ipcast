@@ -3,11 +3,11 @@ vmod_ipcast
 ============
 
 ----------------------
-Varnish Example Module
+Varnish ipcast Module
 ----------------------
 
-:Author: Martin Blix Grydeland
-:Date: 2011-05-26
+:Author: Lasse Karstensen
+:Date: 2013-07-17
 :Version: 1.0
 :Manual section: 3
 
@@ -19,29 +19,27 @@ import ipcast;
 DESCRIPTION
 ===========
 
-Example Varnish vmod demonstrating how to write an out-of-tree Varnish vmod
-for Varnish 3.0 and later.
-
-Implements the traditional Hello World as a vmod.
+This is a Varnish 3.0 VMOD for inserting a VCL string into
+the client.ip internal variable.
 
 FUNCTIONS
 =========
 
-hello
------
+clientip
+--------
 
 Prototype
         ::
 
-                hello(STRING S)
+                clientip(STRING S)
 Return value
-	STRING
+	VOID
 Description
-	Returns "Hello, " prepended to S
-Example
+	Parse the IPv4/IPv6 address in S, and set that to client.ip.
+
         ::
 
-                set resp.http.hello = ipcast.hello("World");
+                ipcast.clientip("192.168.0.10");
 
 INSTALLATION
 ============
@@ -74,12 +72,22 @@ Make targets:
 * make check - runs the unit tests in ``src/tests/*.vtc``
 
 In your VCL you could then use this vmod along the following lines::
-        
-        import ipcast;
 
-        sub vcl_deliver {
-                # This sets resp.http.hello to "Hello, World"
-                set resp.http.hello = ipcast.hello("World");
+        import ipcast;
+        acl friendly_network {
+                "192.0.2.0"/24;
+        }
+        sub vcl_recv {
+                if (req.http.X-Forwarded-For ~ ",") {
+                        # NB: regex might need some improvement.
+                        set req.http.xff = regsub(req.http.X-Forwarded-For,
+                                "^[^,]+.?.?(.*)$", "\1"); }
+                else { set req.http.xff = req.http.X-Forwarded-For; }
+                ipcast.clientip(req.http.xff);
+
+                if (client.ip !~ friendly_network) {
+                        error 403 "Forbidden";
+                }
         }
 
 HISTORY
@@ -94,4 +102,4 @@ COPYRIGHT
 This document is licensed under the same license as the
 libvmod-ipcast project. See LICENSE for details.
 
-* Copyright (c) 2011 Varnish Software
+* Copyright (c) 2011-2013 Varnish Software
