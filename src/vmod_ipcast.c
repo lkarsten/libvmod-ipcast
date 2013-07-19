@@ -27,8 +27,9 @@ int vmod_clientip(struct sess *sp, const char *ipstring) {
 
 	s = getaddrinfo(ipstring, NULL, &hints, &rp);
 	if (s != 0) {
-		VSL(SLT_Debug, 0, "ipcast: Unable to decode IP address '%s'", ipstring);
-		VSL(SLT_Debug, 0, "ipcast: getaddrinfo(): %s", gai_strerror(s));
+		VSL(SLT_VCL_Log, 0, "ipcast: Unable to decode IP address '%s'",
+				ipstring);
+		VSL(SLT_VCL_Log, 0, "ipcast: getaddrinfo(): %s", gai_strerror(s));
 		return(s);
 	}
 
