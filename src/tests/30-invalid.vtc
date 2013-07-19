@@ -9,7 +9,9 @@ varnish v1 -vcl+backend {
 	import ipcast from "${vmod_topbuild}/src/.libs/libvmod_ipcast.so";
 	import std;
 	sub vcl_recv {
-		ipcast.clientip(req.http.X-Forwarded-For);
+		if (ipcast.clientip(req.http.X-Forwarded-For) != 0) {
+			error 400 "Bad request";
+		}
 	}
 	sub vcl_deliver {
 		set resp.http.x-ip = client.ip;
@@ -19,5 +21,5 @@ varnish v1 -vcl+backend {
 client c1 {
 	txreq -url "/" -hdr "X-Forwarded-For: unknown"
 	rxresp
-	expect resp.http.x-ip == "127.0.0.1"
+	expect resp.status == 400
 } -run

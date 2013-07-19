@@ -33,21 +33,24 @@ Prototype
 
                 clientip(STRING S)
 Return value
-	VOID
+	INT
+
 Description
-	Parse the IPv4/IPv6 address in S, and set that to client.ip.
+	Parse the IPv4/IPv6 address in S, and set that to client.ip. If
+	successfull a value of 0 is returned.
+
+	If parsing the IP address with getaddrinfo() fails, the error
+	message will be logged to varnishlog and client.ip is left untouched.
+	A non-zero return code will be set.
+
 
         ::
 
                 ipcast.clientip("192.168.0.10");
+                ipcast.clientip("2001:db8::1");
 
 INSTALLATION
 ============
-
-This is an ipcast skeleton for developing out-of-tree Varnish
-vmods available from the 3.0 release. It implements the "Hello, World!" 
-as a vmod callback. Not particularly useful in good hello world 
-tradition,but demonstrates how to get the glue around a vmod working.
 
 The source tree is based on autotools to configure the building, and
 does also have the necessary bits in place to do functional unit tests
@@ -75,26 +78,30 @@ In your VCL you could then use this vmod along the following lines::
 
         import ipcast;
         acl friendly_network {
-                "192.0.2.0"/24;
+            "192.0.2.0"/24;
         }
         sub vcl_recv {
-                if (req.http.X-Forwarded-For ~ ",") {
-                        # NB: regex might need some improvement.
-                        set req.http.xff = regsub(req.http.X-Forwarded-For,
-                                "^[^,]+.?.?(.*)$", "\1"); }
-                else { set req.http.xff = req.http.X-Forwarded-For; }
-                ipcast.clientip(req.http.xff);
+            if (req.http.X-Forwarded-For !~ ",") {
+                set req.http.xff = req.http.X-Forwarded-For;
+            } else {
+                set req.http.xff = regsub(req.http.X-Forwarded-For,
+                        "^[^,]+.?.?(.*)$", "\1");
+            }
 
-                if (client.ip !~ friendly_network) {
-                        error 403 "Forbidden";
-                }
-        }
+            if (ipcast.clientip(req.http.xff) != 0) {
+                error 400 "Bad request";
+            }
+
+            if (client.ip !~ friendly_network) {
+                    error 403 "Forbidden";
+            }
+    }
 
 HISTORY
 =======
 
-This manual page was released as part of the libvmod-ipcast package,
-demonstrating how to create an out-of-tree Varnish vmod.
+This manual page is released as part of the libvmod-ipcast package. It
+is based on the example document in the libvmod-example package.
 
 COPYRIGHT
 =========

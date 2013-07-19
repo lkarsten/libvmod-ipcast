@@ -13,7 +13,7 @@ init_function(struct vmod_priv *priv, const struct VCL_conf *conf) {
 	return (0);
 }
 
-void vmod_clientip(struct sess *sp, const char *ipstring) {
+int vmod_clientip(struct sess *sp, const char *ipstring) {
 	struct addrinfo hints;
 	struct addrinfo *rp;
 	int s;
@@ -29,11 +29,12 @@ void vmod_clientip(struct sess *sp, const char *ipstring) {
 	if (s != 0) {
 		VSL(SLT_Debug, 0, "ipcast: Unable to decode IP address '%s'", ipstring);
 		VSL(SLT_Debug, 0, "ipcast: getaddrinfo(): %s", gai_strerror(s));
-		return;
+		return(s);
 	}
 
 	sp->sockaddrlen = rp->ai_addrlen;
 	memcpy(sp->sockaddr, rp->ai_addr, sizeof(struct sockaddr_storage));
 
 	freeaddrinfo(rp);
+	return(0);
 }

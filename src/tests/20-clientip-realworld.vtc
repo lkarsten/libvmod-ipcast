@@ -17,8 +17,9 @@ varnish v1 -vcl+backend {
 		else {
 			set req.http.x-newip =  req.http.X-Forwarded-For;
 		}
-		std.log("Setting client.ip to: " + req.http.x-newip);
-		ipcast.clientip(req.http.x-newip);
+		if (ipcast.clientip(req.http.x-newip) != 0) {
+			error 400 "Bad request";
+		}
 	}
 	sub vcl_deliver {
 		set resp.http.x-ip = client.ip;
@@ -30,7 +31,8 @@ client c1 {
 	rxresp
 	expect resp.http.x-ip == "172.16.231.30"
 
-	txreq -url "/" -hdr "X-Forwarded-For: 2a00:1028:83a2:4542:8d6f:1a29:8f2d:df84"
+	txreq -url "/" \
+		-hdr "X-Forwarded-For: 2a00:1028:83a2:4542:8d6f:1a29:8f2d:df84"
 	rxresp
 	expect resp.http.x-ip == "2a00:1028:83a2:4542:8d6f:1a29:8f2d:df84"
 
@@ -38,6 +40,4 @@ client c1 {
 	txreq -url "/" -hdr "X-Forwarded-For: 2001:67c:2804:1001::c21f:27a4"
 	rxresp
 	expect resp.http.x-ip == "2001:67c:2804:1001::c21f:27a4"
-}
-
-client c1 -run
+} -run

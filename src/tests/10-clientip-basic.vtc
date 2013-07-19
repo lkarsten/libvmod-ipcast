@@ -15,7 +15,9 @@ varnish v1 -vcl+backend {
 		"2001:db8::2";
 	}
 	sub vcl_recv {
-		ipcast.clientip(req.http.X-Forwarded-For);
+		if (ipcast.clientip(req.http.X-Forwarded-For) != 0) {
+			error 400 "Bad request";
+		}
 	}
 	sub vcl_deliver {
 		set resp.http.x-ip = client.ip;
