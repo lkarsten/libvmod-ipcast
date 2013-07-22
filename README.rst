@@ -95,7 +95,7 @@ In your VCL you could then use this vmod along the following lines::
             if (client.ip !~ friendly_network) {
                     error 403 "Forbidden";
             }
-    }
+        }
 
 HISTORY
 =======
