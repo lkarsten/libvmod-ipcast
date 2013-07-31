@@ -23,7 +23,6 @@ int vmod_clientip(struct sess *sp, const char *ipstring) {
 
 	// Don't attempt DNS resolution.
 	hints.ai_flags = AI_NUMERICHOST;
-	hints.ai_protocol = 0;
 
 	s = getaddrinfo(ipstring, NULL, &hints, &rp);
 	if (s != 0) {
