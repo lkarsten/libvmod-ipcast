@@ -18,6 +18,7 @@ int vmod_clientip(struct sess *sp, const char *ipstring) {
 	struct addrinfo *rp;
 	int s;
 
+	AN(sp);
 	AN(ipstring);
 
 	memset(&hints, 0, sizeof(struct addrinfo));
@@ -36,7 +37,7 @@ int vmod_clientip(struct sess *sp, const char *ipstring) {
 	AN(rp);
 
 	sp->sockaddrlen = rp->ai_addrlen;
-	memcpy(sp->sockaddr, rp->ai_addr, sizeof(struct sockaddr_storage));
+	memcpy(sp->sockaddr, rp->ai_addr, rp->ai_addrlen);
 
 	freeaddrinfo(rp);
 	return(0);
