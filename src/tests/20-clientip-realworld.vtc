@@ -7,7 +7,6 @@ server s1 {
 
 varnish v1 -vcl+backend {
 	import ipcast from "${vmod_topbuild}/src/.libs/libvmod_ipcast.so";
-	import std;
 	sub vcl_recv {
 		unset req.http.x-newip;
 		if (req.http.X-Forwarded-For ~ ",") {
