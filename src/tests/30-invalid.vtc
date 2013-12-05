@@ -3,12 +3,16 @@ varnishtest "Test ipcast vmod"
 server s1 {
        rxreq
        txresp
+
+       rxreq
+       txresp
 } -start
 
 varnish v1 -vcl+backend {
 	import ipcast from "${vmod_topbuild}/src/.libs/libvmod_ipcast.so";
-	import std;
 	sub vcl_recv {
+		unset req.http.does-not-exist;
+		set req.http.x = ipcast.clientip(req.http.does-not-exist + "");
 		if (ipcast.clientip(req.http.X-Forwarded-For) != 0) {
 			error 400 "Bad request";
 		}
@@ -20,6 +24,12 @@ varnish v1 -vcl+backend {
 
 client c1 {
 	txreq -url "/" -hdr "X-Forwarded-For: unknown"
+	rxresp
+	expect resp.status == 400
+} -run
+
+client c2 {
+	txreq -url "/" -hdr "X-Forwarded-For: "
 	rxresp
 	expect resp.status == 400
 } -run
