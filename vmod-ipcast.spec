@@ -1,7 +1,7 @@
 Summary: ipcast VMOD for Varnish %{VARNISHVER}
-Name: vmod-varnish-%{VARNISHVER}-ipcast
+Name: vmod-ipcast
 Version: 0.1
-Release: 1%{?dist}
+Release: 2%{?dist}
 License: BSD
 Group: System Environment/Daemons
 Source0: libvmod-ipcast.tar.gz
@@ -12,14 +12,13 @@ BuildRequires: make, python-docutils
 %description
 ipcast VMOD for Varnish %{VARNISHVER}. Allows assigning to client.ip from VCL.
 
-
 %prep
 %setup -n libvmod-ipcast
 
 %build
 # this assumes that VARNISHSRC is defined on the rpmbuild command line, like this:
 # rpmbuild -bb --define 'VARNISHSRC /home/user/rpmbuild/BUILD/varnish-3.0.3' redhat/*spec
-./configure VARNISHSRC=%{VARNISHSRC} VMODDIR="$(PKG_CONFIG_PATH=%{VARNISHSRC} pkg-config --variable=vmoddir varnishapi)" --prefix=/usr/
+./configure VARNISHSRC=%{VARNISHSRC} VMODDIR="$(PKG_CONFIG_PATH=%{VARNISHSRC} pkg-config --variable=vmoddir varnishapi)" --prefix=/usr/ --docdir='${datarootdir}/doc/%{name}'
 make
 make check
 
@@ -39,5 +38,8 @@ rm -rf %{buildroot}
 %{_mandir}/man?/*
 
 %changelog
+* Wed Mar  5 2014 Lasse Karstensen <lkarsten@varnish-software.com> - 0.1-0.20140305
+- Updated description to work better with Redhat Satellite.
+
 * Tue Nov 14 2012 Lasse Karstensen <lasse@varnish-software.com> - 0.1-0.20121114
 - Initial version.
