@@ -1,4 +1,4 @@
-Summary: Example VMOD for Varnish
+Summary: ipcast VMOD for Varnish %{VARNISHVER}
 Name: vmod-varnish-%{VARNISHVER}-ipcast
 Version: 0.1
 Release: 1%{?dist}
@@ -10,7 +10,8 @@ Requires: varnish > 3.0
 BuildRequires: make, python-docutils
 
 %description
-Example VMOD
+ipcast VMOD for Varnish %{VARNISHVER}. Allows assigning to client.ip from VCL.
+
 
 %prep
 %setup -n libvmod-ipcast
