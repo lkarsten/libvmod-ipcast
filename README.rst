@@ -7,8 +7,8 @@ Varnish ipcast Module
 ----------------------
 
 :Author: Lasse Karstensen
-:Date: 2013-10-05
-:Version: 1.0
+:Date: 2014-04-04
+:Version: 1.1
 :Manual section: 3
 
 SYNOPSIS
@@ -59,7 +59,7 @@ using the varnishtest tool.
 Usage::
 
  # only if you are building from a git clone.
- ./autogen.sh 
+ ./autogen.sh
  ./configure VARNISHSRC=DIR [VMODDIR=DIR]
 
 `VARNISHSRC` is the directory of the Varnish source tree for which to
@@ -111,4 +111,4 @@ COPYRIGHT
 This document is licensed under the same license as the
 libvmod-ipcast project. See LICENSE for details.
 
-* Copyright (c) 2011-2013 Varnish Software
+* Copyright (c) 2011-2014 Varnish Software

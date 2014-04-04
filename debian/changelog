@@ -1,3 +1,9 @@
+libvmod-ipcast (1.1) unstable; urgency=medium
+
+  * Bump version number.
+
+ -- Lasse Karstensen <lkarsten@varnish-software.com>  Fri, 04 Apr 2014 13:26:17 +0200
+
 libvmod-ipcast (0.1) unstable; urgency=low
 
   * First version
