@@ -22,6 +22,15 @@ DESCRIPTION
 This is a Varnish 3.0 VMOD for inserting a VCL string into
 the client.ip internal variable.
 
+In Varnish >= 4.0 this has been incorporated into VCL itself::
+
+    # For Varnish 4.0, use this instead of this VMOD:
+    import std;
+    sub vcl_recv {
+        if (std.ip(req.http.X-forwarded-for, "0.0.0.0") ~ my_acl) { ... }
+    }
+
+
 FUNCTIONS
 =========
 
