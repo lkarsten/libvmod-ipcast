@@ -46,7 +46,7 @@ Return value
 
 Description
 	Parse the IPv4/IPv6 address in S, and set that to client.ip. If
-	successfull a value of 0 is returned.
+	successful a value of 0 is returned.
 
 	If parsing the IP address with getaddrinfo() fails, the error
 	message will be logged to varnishlog and client.ip is left untouched.
