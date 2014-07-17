@@ -22,7 +22,7 @@ DESCRIPTION
 This is a Varnish 3.0 VMOD for inserting a VCL string into
 the client.ip internal variable.
 
-In Varnish >= 4.0 this has been incorporated into VCL itself::
+In Varnish 4.0 this has been incorporated into VCL itself::
 
     # For Varnish 4.0, use this instead of this VMOD:
     import std;
