@@ -49,7 +49,7 @@ Description
 	When parsing fails the getaddrinfo() error output will be logged to
 	varnishlog.
 
-    Caveat: If the fallback address is unparseable Varnish will crash.
+	Caveat: If the fallback address is unparseable Varnish will crash.
 
 
         ::
