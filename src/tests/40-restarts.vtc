@@ -8,29 +8,22 @@ server s1 {
 varnish v1 -vcl+backend {
 	import ipcast from "${vmod_topbuild}/src/.libs/libvmod_ipcast.so";
 	sub vcl_recv {
+		unset req.http.ip;
 		if (req.restarts == 0) {
-			if (ipcast.clientip("1.2.3.4") != 0) { error 400 "Bad request"; }
-			if (ipcast.clientip("2.3.4.5") != 0) { error 400 "Bad request 2"; }
-			if (ipcast.clientip("3.4.5.6") != 0) { error 400 "Bad request 3"; }
+			set req.http.ip = ipcast.ip("1.2.3.4", "198.51.100.255");
 		} else {
-			if (ipcast.clientip("5.4.3.2") != 0) { error 400 "Bad request 4"; }
-			if (ipcast.clientip("4.3.2.1") != 0) { error 400 "Bad request 5"; }
-			# invalid
-			if (ipcast.clientip("300.300.300.300") == 0) { error 400 "Should fail"; }
-
-			# should set client.ip successfully.
-			if (ipcast.clientip("3.2.1.1") != 0) { error 400 "Bad request 6"; }
+			set req.http.ip = ipcast.ip("2.3.4.5", "198.51.100.255");
 		}
 	}
 	sub vcl_deliver {
 		if (req.restarts == 0) { return(restart); }
-		set resp.http.x-ip = client.ip;
+		set resp.http.x-ip = req.http.ip;
 	}
 } -start
 
 client c1 {
 	txreq -url "/"
 	rxresp
-	expect resp.http.x-ip == "3.2.1.1"
+	expect resp.http.x-ip == "2.3.4.5"
 
 } -run

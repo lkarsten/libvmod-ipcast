@@ -7,8 +7,8 @@ Varnish ipcast Module
 ----------------------
 
 :Author: Lasse Karstensen
-:Date: 2014-04-04
-:Version: 1.1
+:Date: 2014-08-29
+:Version: 1.2
 :Manual section: 3
 
 SYNOPSIS
@@ -19,44 +19,47 @@ import ipcast;
 DESCRIPTION
 ===========
 
-This is a Varnish 3.0 VMOD for inserting a VCL string into
-the client.ip internal variable.
+This is a Varnish 3.0 VMOD for converting a string into an IP type
+in VCL.
 
-In Varnish 4.0 this has been incorporated into VCL itself::
+Note that previously this VMOD overwrote the ``client.ip`` internal
+variable. This was an inherently flawed method and has since been abandoned.
 
-    # For Varnish 4.0, use this instead of this VMOD:
-    import std;
-    sub vcl_recv {
-        if (std.ip(req.http.X-forwarded-for, "0.0.0.0") ~ my_acl) { ... }
-    }
+For Varnish 4.0 use the built-in ``std.ip()`` function.
 
+This VMOD is tested on Varnish 3.0.5.
 
 FUNCTIONS
 =========
 
-clientip
---------
+ip
+--
 
 Prototype
         ::
 
-                clientip(STRING S)
+                ip(STRING S, STRING fallback)
 Return value
-	INT
+	IP
 
 Description
-	Parse the IPv4/IPv6 address in S, and set that to client.ip. If
-	successful a value of 0 is returned.
+	Parse the IPv4/IPv6 address in S and return that. If not successful, parse
+	the string in fallback and return that.
 
-	If parsing the IP address with getaddrinfo() fails, the error
-	message will be logged to varnishlog and client.ip is left untouched.
-	A non-zero return code will be set.
+	When parsing fails the getaddrinfo() error output will be logged to
+	varnishlog.
+
+    Caveat: If the fallback address is unparseable Varnish will crash.
 
 
         ::
 
-                ipcast.clientip("192.168.0.10");
-                ipcast.clientip("2001:db8::1");
+                set resp.http.xff = regsub(req.http.X-Forwarded-For, "^(^[^,]+),?.*$", "\1");
+                if (ipcast.ip(req.http.xff, "198.51.100.255") == "198.51.100.255") { error 400 "Bad request"; }
+
+                set resp.http.x-parsed-ip = ipcast.ip("2001:db8::1", "198.51.100.255");
+
+
 
 INSTALLATION
 ============
@@ -92,18 +95,12 @@ In your VCL you could then use this vmod along the following lines::
             "192.0.2.0"/24;
         }
         sub vcl_recv {
-            if (req.http.X-Forwarded-For !~ ",") {
-                set req.http.xff = req.http.X-Forwarded-For;
-            } else {
-                set req.http.xff = regsub(req.http.X-Forwarded-For,
-                        "^[^,]+.?.?(.*)$", "\1");
-            }
-
-            if (ipcast.clientip(req.http.xff) != 0) {
+            set resp.http.xff = regsub(req.http.X-Forwarded-For, "^(^[^,]+),?.*$", "\1");
+            if (ipcast.ip(req.http.xff, "198.51.100.255") == "198.51.100.255") {
                 error 400 "Bad request";
             }
 
-            if (client.ip !~ friendly_network) {
+            if (ipcast.ip(req.http.xff, "198.51.100.255") !~ friendly_network) {
                     error 403 "Forbidden";
             }
         }

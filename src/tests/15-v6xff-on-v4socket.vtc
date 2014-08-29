@@ -1,0 +1,40 @@
+varnishtest "ipcast and connection keepalive"
+
+server s1 {
+       rxreq
+       txresp
+} -start
+
+varnish v1 -vcl+backend {
+	import ipcast from "${vmod_topbuild}/src/.libs/libvmod_ipcast.so";
+	import std;
+
+	sub vcl_recv {
+		set req.http.x-orig = "orig-" + client.ip;
+		set req.http.xff = regsub(req.http.X-Forwarded-For, "^(^[^,]+),?.*$", "\1");
+		if (ipcast.ip(req.http.xff, "198.51.100.255") == "198.51.100.255") { error 400 "Bad request"; }
+	}
+	sub vcl_deliver {
+		set resp.http.x-orig = req.http.x-orig;
+		set resp.http.x-ip = ipcast.ip(req.http.xff, "198.51.100.255");
+	}
+} -start
+
+client c1 {
+	txreq -url "/" -hdr "X-Forwarded-For: 127.0.0.2"
+	rxresp
+	expect resp.http.x-orig == "orig-127.0.0.1"
+	expect resp.http.x-ip == "127.0.0.2"
+
+	txreq -url "/" -hdr "X-Forwarded-For: 2001:db8::2"
+	rxresp
+	expect resp.http.x-orig == "orig-127.0.0.1"
+	expect resp.http.x-ip == "2001:db8::2"
+
+	txreq -url "/" -hdr "X-Forwarded-For: 127.0.0.2, 2001:db8::2, 127.0.0.10"
+	rxresp
+	expect resp.http.x-orig == "orig-127.0.0.1"
+	expect resp.http.x-ip == "127.0.0.2"
+}
+
+client c1 -run

@@ -8,27 +8,18 @@ server s1 {
 varnish v1 -vcl+backend {
 	import ipcast from "${vmod_topbuild}/src/.libs/libvmod_ipcast.so";
 	sub vcl_recv {
-		unset req.http.x-newip;
-		if (req.http.X-Forwarded-For ~ ",") {
-			set req.http.x-newip = regsub(req.http.X-Forwarded-For,
-				"^[^,]+.?.?(.*)$", "\1");
-		}
-		else {
-			set req.http.x-newip =  req.http.X-Forwarded-For;
-		}
-		if (ipcast.clientip(req.http.x-newip) != 0) {
-			error 400 "Bad request";
-		}
+                set req.http.x-client = regsub(req.http.X-Forwarded-For, "^(^[^,]+),?.*$", "\1");
+                if (ipcast.ip(req.http.x-client, "198.51.100.255") == "198.51.100.255") { error 400 "Bad request"; }
 	}
 	sub vcl_deliver {
-		set resp.http.x-ip = client.ip;
+		set resp.http.x-ip = ipcast.ip(req.http.x-client, "198.51.100.255");
 	}
 } -start
 
 client c1 {
 	txreq -url "/" -hdr "X-Forwarded-For: 192.168.101.227, 172.16.231.30"
 	rxresp
-	expect resp.http.x-ip == "172.16.231.30"
+	expect resp.http.x-ip == "192.168.101.227"
 
 	txreq -url "/" \
 		-hdr "X-Forwarded-For: 2a00:1028:83a2:4542:8d6f:1a29:8f2d:df84"

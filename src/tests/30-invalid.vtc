@@ -1,4 +1,4 @@
-varnishtest "Test ipcast vmod"
+varnishtest "Test invalid input to ipcast vmod"
 
 server s1 {
        rxreq
@@ -12,13 +12,9 @@ varnish v1 -vcl+backend {
 	import ipcast from "${vmod_topbuild}/src/.libs/libvmod_ipcast.so";
 	sub vcl_recv {
 		unset req.http.does-not-exist;
-		set req.http.x = ipcast.clientip(req.http.does-not-exist + "");
-		if (ipcast.clientip(req.http.X-Forwarded-For) != 0) {
+                if (ipcast.ip(req.http.does-not-exist, "198.51.100.255") == "198.51.100.255") {
 			error 400 "Bad request";
 		}
-	}
-	sub vcl_deliver {
-		set resp.http.x-ip = client.ip;
 	}
 } -start
 
@@ -29,6 +25,12 @@ client c1 {
 } -run
 
 client c2 {
+	txreq -url "/" -hdr "X-Forwarded-For: ,,,"
+	rxresp
+	expect resp.status == 400
+} -run
+
+client c3 {
 	txreq -url "/" -hdr "X-Forwarded-For: "
 	rxresp
 	expect resp.status == 400

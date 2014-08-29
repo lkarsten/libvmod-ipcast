@@ -11,31 +11,33 @@ server s1 {
 varnish v1 -vcl+backend {
 	import ipcast from "${vmod_topbuild}/src/.libs/libvmod_ipcast.so";
 	acl foo {
-		"127.0.0.2";
+		"192.0.2.1";
 		"2001:db8::2";
 	}
-	sub vcl_recv {
-		if (ipcast.clientip(req.http.X-Forwarded-For) != 0) {
-			error 400 "Bad request";
-		}
-	}
 	sub vcl_deliver {
-		set resp.http.x-ip = client.ip;
-		if (client.ip ~ foo) {
+		set resp.http.xff = regsub(req.http.X-Forwarded-For, "^(^[^,]+),?.*$", "\1");
+		set resp.http.x-parsed-ip = ipcast.ip(resp.http.xff, "198.51.100.255");
+
+		if (ipcast.ip(resp.http.xff, "198.51.100.254") ~ foo) {
 			set resp.http.x-aclmatch = "true";
 		}
 	}
 } -start
 
 client c1 {
-	txreq -url "/" -hdr "X-Forwarded-For: 127.0.0.2"
+	txreq -url "/" -hdr "X-Forwarded-For: 192.0.2.1"
 	rxresp
-	expect resp.http.x-ip == "127.0.0.2"
+	expect resp.http.x-parsed-ip == "192.0.2.1"
 	expect resp.http.x-aclmatch == "true"
 
 	txreq -url "/" -hdr "X-Forwarded-For: 2001:db8::2"
 	rxresp
-	expect resp.http.x-ip == "2001:db8::2"
+	expect resp.http.x-parsed-ip == "2001:db8::2"
+	expect resp.http.x-aclmatch == "true"
+
+	txreq -url "/" -hdr "X-Forwarded-For: 192.0.2.1"
+	rxresp
+	expect resp.http.x-parsed-ip == "192.0.2.1"
 	expect resp.http.x-aclmatch == "true"
 }
 
