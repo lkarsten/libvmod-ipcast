@@ -7,7 +7,6 @@ server s1 {
 
 varnish v1 -vcl+backend {
 	import ipcast from "${vmod_topbuild}/src/.libs/libvmod_ipcast.so";
-	import std;
 
 	sub vcl_recv {
 		set req.http.x-orig = "orig-" + client.ip;
