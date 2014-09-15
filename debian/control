@@ -8,5 +8,5 @@ Vcs-Git: git://github.com/lkarsten/libvmod-ipcast.git
 
 Package: libvmod-ipcast
 Architecture: all
-Depends: varnish, ${misc:Depends}
+Depends: varnish, ${Varnish:ABI}, ${misc:Depends}
 Description: Vmod for Varnish
