@@ -1,7 +1,7 @@
 Summary: ipcast VMOD for Varnish %{VARNISHVER}
 Name: vmod-ipcast
-Version: 1.1
-Release: 2%{?dist}
+Version: 1.2
+Release: 1%{?dist}
 License: BSD
 Group: System Environment/Daemons
 Source0: libvmod-ipcast.tar.gz

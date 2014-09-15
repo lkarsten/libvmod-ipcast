@@ -1,3 +1,9 @@
+libvmod-ipcast (1.2) unstable; urgency=medium
+
+  * Prepare 1.2 due to packaging. No code changes.
+
+ -- Lasse Karstensen <lkarsten@varnish-software.com>  Mon, 15 Sep 2014 16:48:35 +0200
+
 libvmod-ipcast (1.1) unstable; urgency=medium
 
   * Bump version number.
