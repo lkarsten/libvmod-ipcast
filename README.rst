@@ -54,7 +54,7 @@ Description
 
         ::
 
-                set resp.http.xff = regsub(req.http.X-Forwarded-For, "^(^[^,]+),?.*$", "\1");
+                set req.http.xff = regsub(req.http.X-Forwarded-For, "^(^[^,]+),?.*$", "\1");
                 if (ipcast.ip(req.http.xff, "198.51.100.255") == "198.51.100.255") { error 400 "Bad request"; }
 
                 set resp.http.x-parsed-ip = ipcast.ip("2001:db8::1", "198.51.100.255");
@@ -95,7 +95,7 @@ In your VCL you could then use this vmod along the following lines::
             "192.0.2.0"/24;
         }
         sub vcl_recv {
-            set resp.http.xff = regsub(req.http.X-Forwarded-For, "^(^[^,]+),?.*$", "\1");
+            set req.http.xff = regsub(req.http.X-Forwarded-For, "^(^[^,]+),?.*$", "\1");
             if (ipcast.ip(req.http.xff, "198.51.100.255") == "198.51.100.255") {
                 error 400 "Bad request";
             }
