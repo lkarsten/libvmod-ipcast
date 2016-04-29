@@ -2,7 +2,7 @@ ACLOCAL_AMFLAGS = -I m4
 
 SUBDIRS = src
 
-EXTRA_DIST = README.rst LICENSE vmod-ipcast.spec debian
+EXTRA_DIST = README.rst LICENSE
 
 doc_DATA = README.rst LICENSE
 
