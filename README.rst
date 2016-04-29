@@ -7,8 +7,8 @@ Varnish ipcast Module
 ----------------------
 
 :Author: Lasse Karstensen
-:Date: 2014-08-29
-:Version: 1.2
+:Date: 2016-04-29
+:Version: 1.3
 :Manual section: 3
 
 SYNOPSIS
@@ -25,9 +25,9 @@ in VCL.
 Note that previously this VMOD overwrote the ``client.ip`` internal
 variable. This was an inherently flawed method and has since been abandoned.
 
-For Varnish 4.0 use the built-in ``std.ip()`` function.
+For Varnish 4 use the built-in ``std.ip()`` function.
 
-This VMOD is tested on Varnish 3.0.5.
+This VMOD is tested on Varnish 3.0.7.
 
 FUNCTIONS
 =========
@@ -104,17 +104,10 @@ In your VCL you could then use this vmod along the following lines::
                     error 403 "Forbidden";
             }
         }
-
-HISTORY
-=======
-
-This manual page is released as part of the libvmod-ipcast package. It
-is based on the example document in the libvmod-example package.
-
 COPYRIGHT
 =========
 
 This document is licensed under the same license as the
 libvmod-ipcast project. See LICENSE for details.
 
-* Copyright (c) 2011-2014 Varnish Software
+* Copyright (c) 2011-2016 Varnish Software

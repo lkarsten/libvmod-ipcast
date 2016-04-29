@@ -1,6 +1,6 @@
 AC_PREREQ(2.59)
-AC_COPYRIGHT([Copyright (c) 2011 Varnish Software AS])
-AC_INIT([libvmod-ipcast], [1.2])
+AC_COPYRIGHT([Copyright (c) 2011-2016 Varnish Software])
+AC_INIT([libvmod-ipcast], [1.3])
 AC_CONFIG_MACRO_DIR([m4])
 AC_CONFIG_SRCDIR(src/vmod_ipcast.vcc)
 AM_CONFIG_HEADER(config.h)
